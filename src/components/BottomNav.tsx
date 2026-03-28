@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Image, MessageCircle, BookOpen, Disc3 } from "lucide-react";
+import { Sparkles, FlameKindling, Home, Music, Gift } from "lucide-react";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: BookOpen, label: "Mantra", path: "/mantra" },
-  { icon: Disc3, label: "Japa", path: "/japa" },
-  { icon: Image, label: "Gallery", path: "/gallery" },
-  { icon: MessageCircle, label: "Chat", path: "/chat" },
+  { icon: Sparkles, label: "विशेष", path: "/" },
+  { icon: FlameKindling, label: "पूजा", path: "/pooja" },
+  { icon: Home, label: "मंदिर", path: "/mandir" },
+  { icon: Music, label: "संगीत", path: "/sangeet" },
+  { icon: Gift, label: "चढ़ावा", path: "/chadawa" },
 ];
 
 const BottomNav = () => {
@@ -22,14 +22,15 @@ const BottomNav = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-300 ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-300 ${
                 isActive
-                  ? "text-primary glow-saffron"
+                  ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <item.icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_hsl(25_100%_50%/0.8)]" : ""}`} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-devanagari font-medium">{item.label}</span>
+              {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
             </button>
           );
         })}

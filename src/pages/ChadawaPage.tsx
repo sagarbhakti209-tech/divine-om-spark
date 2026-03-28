@@ -1,0 +1,241 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Phone, Star, Calendar, Mail, Flame, Download } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
+
+import shiva from "@/assets/shiva.jpg";
+import krishna from "@/assets/krishna.jpg";
+import lakshmi from "@/assets/lakshmi.jpg";
+import hanuman from "@/assets/hanuman.jpg";
+import durga from "@/assets/durga.jpg";
+import ganesha from "@/assets/ganesha.jpg";
+
+const tabs = ["ज्योतिष", "राशिफल", "पंचांग", "सुविचार", "वॉलपेपर"];
+
+const rashis = [
+  { name: "मेष राशि", icon: "♈", dates: "21 मार्च - 19 अप्रैल" },
+  { name: "वृषभ राशि", icon: "♉", dates: "20 अप्रैल - 20 मई" },
+  { name: "मिथुन राशि", icon: "♊", dates: "21 मई - 20 जून" },
+  { name: "कर्क राशि", icon: "♋", dates: "21 जून - 22 जुलाई" },
+  { name: "सिंह राशि", icon: "♌", dates: "23 जुलाई - 22 अगस्त" },
+  { name: "कन्या राशि", icon: "♍", dates: "23 अगस्त - 22 सितंबर" },
+  { name: "तुला राशि", icon: "♎", dates: "23 सितंबर - 22 अक्टूबर" },
+  { name: "वृश्चिक राशि", icon: "♏", dates: "23 अक्टूबर - 21 नवंबर" },
+  { name: "धनु राशि", icon: "♐", dates: "22 नवंबर - 21 दिसंबर" },
+  { name: "मकर राशि", icon: "♑", dates: "22 दिसंबर - 19 जनवरी" },
+  { name: "कुंभ राशि", icon: "♒", dates: "20 जनवरी - 18 फरवरी" },
+  { name: "मीन राशि", icon: "♓", dates: "19 फरवरी - 20 मार्च" },
+];
+
+const suvichars = [
+  { text: "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।", source: "श्रीमद्भगवद्गीता 2.47" },
+  { text: "योगः कर्मसु कौशलम्।", source: "श्रीमद्भगवद्गीता 2.50" },
+  { text: "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज।", source: "श्रीमद्भगवद्गीता 18.66" },
+  { text: "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।", source: "श्रीमद्भगवद्गीता 6.5" },
+  { text: "मन एव मनुष्याणां कारणं बन्धमोक्षयोः।", source: "अमृतबिन्दु उपनिषद्" },
+];
+
+const wallpapers = [
+  { name: "देवी लक्ष्मी", img: lakshmi },
+  { name: "श्री गणेश", img: ganesha },
+  { name: "हनुमान जी", img: hanuman },
+  { name: "भगवान शिव", img: shiva },
+  { name: "श्री कृष्ण", img: krishna },
+  { name: "माँ दुर्गा", img: durga },
+];
+
+const ChadawaPage = () => {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div className="min-h-screen bg-background relative overflow-hidden pb-24">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--gold)/0.08)_0%,transparent_50%)]" />
+
+      <div className="relative z-10 px-4 pt-6 max-w-lg mx-auto">
+        {/* Header */}
+        <motion.div
+          className="flex items-center justify-between mb-4"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <span className="text-lg">←</span>
+          <h1 className="text-lg font-bold text-primary font-devanagari">महाभंडार</h1>
+          <div className="flex items-center gap-1 glass-card px-2 py-1 rounded-full">
+            <span className="text-xs text-foreground">0</span>
+            <span className="text-sm">🪙</span>
+          </div>
+        </motion.div>
+
+        {/* Tab Icons */}
+        <div className="flex justify-around mb-4">
+          {tabs.map((tab, i) => {
+            const icons = [Phone, Star, Calendar, Mail, Flame];
+            const Icon = icons[i];
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(i)}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  activeTab === i ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                  activeTab === i ? "bg-primary/20 text-primary" : "bg-muted/50"
+                }`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-devanagari">{tab}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Content */}
+        <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Jyotish */}
+          {activeTab === 0 && (
+            <div className="space-y-3">
+              <div className="glass-card p-4 text-center">
+                <p className="text-lg font-bold text-foreground font-devanagari mb-2">पहली कंसल्टेशन बिलकुल मुफ्त करें।</p>
+                <p className="text-xs text-muted-foreground mb-3">अनुभवी ज्योतिषाचार्यों से बात करें</p>
+              </div>
+              {[
+                { name: "गुरुजी", spec: "वैदिक ज्योतिष", rating: "5.0", price: "निःशुल्क", exp: "" },
+                { name: "आचार्य राजीव", spec: "वैदिक, पामिस्ट्री, सिग्नेचर", rating: "5.0", price: "₹33/min", exp: "20 साल" },
+                { name: "ज्योतिषी शिवानी", spec: "KP, वैदिक, न्यूमेरोलॉजी", rating: "4.8", price: "₹27/min", exp: "4 साल" },
+              ].map((astro) => (
+                <div key={astro.name} className="glass-card p-3 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-lg font-devanagari text-primary">
+                    {astro.name[0]}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-foreground font-devanagari">{astro.name}</p>
+                    <p className="text-[11px] text-muted-foreground font-devanagari">{astro.spec}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-secondary">⭐ {astro.rating}</span>
+                      {astro.exp && <span className="text-[10px] text-muted-foreground">• अनुभव {astro.exp}</span>}
+                    </div>
+                    <p className="text-xs text-primary font-medium mt-0.5">{astro.price}</p>
+                  </div>
+                  <button className="glass-card px-3 py-1.5 rounded-lg text-xs text-primary font-medium">
+                    💬 चैट
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Rashifal */}
+          {activeTab === 1 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-bold text-foreground font-devanagari">
+                <div className="w-1 h-4 rounded-full bg-primary inline-block mr-2" />
+                वार्षिक राशिफल 2026
+              </h2>
+              <div className="grid grid-cols-3 gap-2">
+                {rashis.map((rashi) => (
+                  <button key={rashi.name} className="glass-card p-3 flex flex-col items-center gap-1 hover:glow-saffron transition-all active:scale-95">
+                    <span className="text-2xl">{rashi.icon}</span>
+                    <span className="text-[11px] font-devanagari text-foreground text-center">{rashi.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Panchang */}
+          {activeTab === 2 && (
+            <div className="space-y-3">
+              <div className="glass-card p-4">
+                <div className="flex gap-2 mb-3">
+                  <button className="flex-1 bg-primary text-primary-foreground py-1.5 rounded-lg text-xs font-devanagari">दैनिक</button>
+                  <button className="flex-1 glass-card text-muted-foreground py-1.5 rounded-lg text-xs font-devanagari">मासिक</button>
+                </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-4xl">🌙</div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground font-devanagari">शुक्ल पक्ष दशमी, शनिवार</p>
+                    <p className="text-xs text-muted-foreground">8:47 AM तक</p>
+                    <p className="text-xs text-muted-foreground font-devanagari">चैत्र मास • वसंत, सिद्धार्थ 2083</p>
+                  </div>
+                </div>
+                <h4 className="text-xs font-bold text-foreground font-devanagari mb-2">शुभ-अशुभ समय</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-2">
+                    <p className="text-primary font-medium font-devanagari">शुभ मुहूर्त</p>
+                    <p className="text-foreground">11:40 AM - 12:28 PM</p>
+                  </div>
+                  <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-2">
+                    <p className="text-secondary font-medium font-devanagari">गुलिक काल</p>
+                    <p className="text-foreground">5:55 AM - 7:27 AM</p>
+                  </div>
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-2">
+                    <p className="text-destructive font-medium font-devanagari">राहुकाल</p>
+                    <p className="text-foreground">8:59 - 10:32 AM</p>
+                  </div>
+                  <div className="bg-muted rounded-lg p-2">
+                    <p className="text-muted-foreground font-medium font-devanagari">यमगंड</p>
+                    <p className="text-foreground">1:59 - 3:31 PM</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Suvichar */}
+          {activeTab === 3 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-bold text-foreground font-devanagari">
+                <div className="w-1 h-4 rounded-full bg-secondary inline-block mr-2" />
+                आज के सुविचार
+              </h2>
+              {suvichars.map((s, i) => (
+                <motion.div
+                  key={i}
+                  className="glass-card p-4 border-l-4 border-l-secondary"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <p className="text-sm font-devanagari text-foreground italic leading-relaxed">"{s.text}"</p>
+                  <p className="text-xs text-primary mt-2 font-devanagari">— {s.source}</p>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Wallpapers */}
+          {activeTab === 4 && (
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold text-foreground font-devanagari">
+                <div className="w-1 h-4 rounded-full bg-primary inline-block mr-2" />
+                देवी-देवता वॉलपेपर 🌟
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                {wallpapers.map((wp) => (
+                  <div key={wp.name} className="glass-card overflow-hidden group">
+                    <div className="aspect-[3/4] relative">
+                      <img src={wp.img} alt={wp.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-3">
+                        <button className="glass-card px-3 py-1.5 rounded-full text-xs text-foreground flex items-center gap-1">
+                          <Download className="w-3 h-3" /> डाउनलोड
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <p className="text-xs font-devanagari text-foreground text-center">{wp.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+};
+
+export default ChadawaPage;

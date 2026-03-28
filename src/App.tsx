@@ -13,6 +13,10 @@ import MantraPage from "./pages/MantraPage";
 import GalleryPage from "./pages/GalleryPage";
 import ChatPage from "./pages/ChatPage";
 import JapaPage from "./pages/JapaPage";
+import PoojaPage from "./pages/PoojaPage";
+import MandirPage from "./pages/MandirPage";
+import SangeetPage from "./pages/SangeetPage";
+import ChadawaPage from "./pages/ChadawaPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +41,10 @@ const App = () => {
                 <Route path="/gallery" element={<GalleryPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/japa" element={<JapaPage />} />
+                <Route path="/pooja" element={<PoojaPage />} />
+                <Route path="/mandir" element={<MandirPage />} />
+                <Route path="/sangeet" element={<SangeetPage />} />
+                <Route path="/chadawa" element={<ChadawaPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
