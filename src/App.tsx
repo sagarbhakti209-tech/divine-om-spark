@@ -22,16 +22,18 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/mantra" element={<MantraPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/japa" element={<JapaPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+          <div className={showSplash ? "opacity-0 pointer-events-none" : "opacity-100 transition-opacity duration-500"}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/mantra" element={<MantraPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/japa" element={<JapaPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
