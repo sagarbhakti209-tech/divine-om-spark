@@ -4,7 +4,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AudioProvider } from "@/contexts/AudioContext";
 import SplashScreen from "./components/SplashScreen";
+import AudioControls from "./components/AudioControls";
+import PrayerReminder from "./components/PrayerReminder";
 import Index from "./pages/Index";
 import MantraPage from "./pages/MantraPage";
 import GalleryPage from "./pages/GalleryPage";
@@ -20,21 +23,25 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-          <div className={showSplash ? "opacity-0 pointer-events-none" : "opacity-100 transition-opacity duration-500"}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/mantra" element={<MantraPage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="/japa" element={<JapaPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-        </BrowserRouter>
+        <AudioProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+            <div className={showSplash ? "opacity-0 pointer-events-none" : "opacity-100 transition-opacity duration-500"}>
+              <AudioControls />
+              <PrayerReminder />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/mantra" element={<MantraPage />} />
+                <Route path="/gallery" element={<GalleryPage />} />
+                <Route path="/chat" element={<ChatPage />} />
+                <Route path="/japa" element={<JapaPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </BrowserRouter>
+        </AudioProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

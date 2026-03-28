@@ -1,24 +1,88 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import BottomNav from "@/components/BottomNav";
 import FloatingParticles from "@/components/FloatingParticles";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const spiritualResponses = [
-  "🙏 भगवान हमेशा तुम्हारे साथ हैं। विश्वास रखो, सब अच्छा होगा।",
-  "ॐ का जाप करो, मन शांत हो जाएगा। शांति तुम्हारे अंदर है।",
-  "सब कुछ समय के साथ ठीक होता है। धैर्य रखो और प्रभु पर भरोसा रखो।",
-  "जब मन दुखी हो, तो भगवान का नाम लो। वो हर पल तुम्हारे पास हैं।",
-  "कर्म करो, फल की चिंता मत करो। गीता का यही संदेश है।",
-  "हर सुबह एक नई शुरुआत है। भगवान ने तुम्हें आज का दिन दिया है, इसका सदुपयोग करो।",
-  "प्रेम और करुणा से बड़ी कोई पूजा नहीं है। सबसे प्रेम करो।",
-  "🙏 ध्यान करो, मन को शांत करो। भगवान तुम्हारे हृदय में निवास करते हैं।",
-];
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/spiritual-chat`;
+
+async function streamChat({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Message[];
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (error: string) => void;
+}) {
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!resp.ok) {
+      const errorData = await resp.json().catch(() => ({}));
+      onError(errorData.error || "Something went wrong");
+      return;
+    }
+
+    if (!resp.body) {
+      onError("No response body");
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    onDone();
+  } catch (e) {
+    onError(e instanceof Error ? e.message : "Network error");
+  }
+}
 
 const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -28,26 +92,57 @@ const ChatPage = () => {
     },
   ]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
     const userMsg: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput("");
-    setIsTyping(true);
+    setIsLoading(true);
 
-    // Simulated spiritual response (replace with AI later)
-    setTimeout(() => {
-      const response = spiritualResponses[Math.floor(Math.random() * spiritualResponses.length)];
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
-      setIsTyping(false);
-    }, 1500);
+    let assistantSoFar = "";
+
+    const upsertAssistant = (chunk: string) => {
+      assistantSoFar += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && prev.length > updatedMessages.length) {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev.slice(0, -1), ...( prev.length === updatedMessages.length ? [prev[prev.length-1], { role: "assistant" as const, content: assistantSoFar }] : [{ ...prev[prev.length-1] }])];
+      });
+    };
+
+    await streamChat({
+      messages: updatedMessages,
+      onDelta: (chunk) => {
+        assistantSoFar += chunk;
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && assistantSoFar.length > chunk.length) {
+            return [...prev.slice(0, -1), { role: "assistant", content: assistantSoFar }];
+          }
+          return [...prev, { role: "assistant", content: assistantSoFar }];
+        });
+      },
+      onDone: () => setIsLoading(false),
+      onError: (error) => {
+        setIsLoading(false);
+        toast.error(error);
+        // Fallback response
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "🙏 क्षमा करें, अभी कुछ समस्या आ रही है। कृपया थोड़ी देर बाद प्रयास करें।" },
+        ]);
+      },
+    });
   };
 
   return (
@@ -60,7 +155,7 @@ const ChatPage = () => {
         <h1 className="text-xl font-bold text-foreground text-glow-saffron">
           💬 Chat with God
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">AI Spiritual Guide</p>
+        <p className="text-xs text-muted-foreground mt-1">AI Spiritual Guide • Powered by Lovable AI</p>
       </div>
 
       {/* Messages */}
@@ -79,11 +174,17 @@ const ChatPage = () => {
                   : "glass-card text-foreground rounded-bl-md"
               }`}
             >
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <div className="prose prose-sm prose-invert max-w-none">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              ) : (
+                msg.content
+              )}
             </div>
           </motion.div>
         ))}
-        {isTyping && (
+        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <motion.div
             className="flex justify-start"
             initial={{ opacity: 0 }}
@@ -111,10 +212,11 @@ const ChatPage = () => {
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="अपने मन की बात बताइए..."
             className="flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground"
+            disabled={isLoading}
           />
           <button
             onClick={sendMessage}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             className="w-9 h-9 rounded-full gradient-saffron flex items-center justify-center disabled:opacity-40 transition-opacity"
           >
             <Send className="w-4 h-4 text-primary-foreground" />
