@@ -1,9 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Image, MessageCircle, BookOpen } from "lucide-react";
+import { Home, Image, MessageCircle, BookOpen, Disc3 } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Mantra", path: "/mantra" },
+  { icon: Disc3, label: "Japa", path: "/japa" },
   { icon: Image, label: "Gallery", path: "/gallery" },
   { icon: MessageCircle, label: "Chat", path: "/chat" },
 ];
