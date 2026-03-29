@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Heart, Share2, MoreVertical } from "lucide-react";
+import { Play, Pause, Heart, MoreVertical } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import NowPlayingBar from "@/components/NowPlayingBar";
+import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 
 import hanuman from "@/assets/hanuman.jpg";
 import shiva from "@/assets/shiva.jpg";
@@ -44,8 +46,8 @@ const songs = [
 const SangeetPage = () => {
   const [activeCategory, setActiveCategory] = useState(0);
   const [activeFilter, setActiveFilter] = useState(0);
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [likedSongs, setLikedSongs] = useState<Set<number>>(new Set());
+  const player = useAudioPlayer();
 
   const filteredSongs = songs.filter((song) => {
     if (activeFilter > 0 && song.category !== filters[activeFilter]) return false;
@@ -61,6 +63,24 @@ const SangeetPage = () => {
       return next;
     });
   };
+
+  const handlePlaySong = (globalIndex: number) => {
+    player.togglePlayPause(globalIndex, songs[globalIndex].duration);
+  };
+
+  const handleNext = () => {
+    if (player.currentSongIndex === null) return;
+    const nextIdx = (player.currentSongIndex + 1) % songs.length;
+    player.playSong(nextIdx, songs[nextIdx].duration);
+  };
+
+  const handlePrev = () => {
+    if (player.currentSongIndex === null) return;
+    const prevIdx = (player.currentSongIndex - 1 + songs.length) % songs.length;
+    player.playSong(prevIdx, songs[prevIdx].duration);
+  };
+
+  const currentSong = player.currentSongIndex !== null ? songs[player.currentSongIndex] : null;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden pb-24">
@@ -128,33 +148,43 @@ const SangeetPage = () => {
         {/* Song List */}
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground mb-2 font-devanagari">
-            {activeCategory === 0 ? "पसंदीदा में जोड़ने के लिए सुझाव" : `${deityCategories[activeCategory].name} के भजन`}
+            {activeCategory === 0 ? "गाने चलाने के लिए टैप करें 🎶" : `${deityCategories[activeCategory].name} के भजन`}
           </p>
           {filteredSongs.map((song, i) => {
             const globalIndex = songs.indexOf(song);
-            const isPlaying = playingIndex === globalIndex;
+            const isPlaying = player.currentSongIndex === globalIndex && player.isPlaying;
+            const isSelected = player.currentSongIndex === globalIndex;
             return (
               <motion.div
                 key={`${song.title}-${i}`}
-                className="glass-card flex items-center gap-3 p-3 hover:bg-muted/30 transition-colors"
+                className={`glass-card flex items-center gap-3 p-3 transition-colors cursor-pointer ${
+                  isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/30"
+                }`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
+                onClick={() => handlePlaySong(globalIndex)}
               >
                 {/* Thumbnail */}
-                <button
-                  onClick={() => setPlayingIndex(isPlaying ? null : globalIndex)}
-                  className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-                >
+                <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                   <img src={song.img} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-background/40 flex items-center justify-center">
                     {isPlaying ? (
-                      <Pause className="w-4 h-4 text-primary" />
+                      <div className="flex items-end gap-[2px] h-3">
+                        {[0, 1, 2].map(b => (
+                          <motion.div
+                            key={b}
+                            className="w-[3px] bg-primary rounded-full"
+                            animate={{ height: ["4px", "12px", "6px", "10px", "4px"] }}
+                            transition={{ duration: 0.8, repeat: Infinity, delay: b * 0.15 }}
+                          />
+                        ))}
+                      </div>
                     ) : (
                       <Play className="w-4 h-4 text-foreground ml-0.5" />
                     )}
                   </div>
-                </button>
+                </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -169,7 +199,7 @@ const SangeetPage = () => {
 
                 {/* Actions */}
                 <button
-                  onClick={() => toggleLike(globalIndex)}
+                  onClick={(e) => { e.stopPropagation(); toggleLike(globalIndex); }}
                   className="p-1"
                 >
                   <Heart
@@ -178,7 +208,7 @@ const SangeetPage = () => {
                     }`}
                   />
                 </button>
-                <button className="p-1 text-muted-foreground">
+                <button className="p-1 text-muted-foreground" onClick={(e) => e.stopPropagation()}>
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </motion.div>
@@ -191,6 +221,21 @@ const SangeetPage = () => {
           )}
         </div>
       </div>
+
+      {/* Now Playing Bar */}
+      {currentSong && (
+        <NowPlayingBar
+          songTitle={currentSong.title}
+          artist={currentSong.artist}
+          img={currentSong.img}
+          isPlaying={player.isPlaying}
+          progress={player.progress}
+          onToggle={() => handlePlaySong(player.currentSongIndex!)}
+          onClose={() => player.pause()}
+          onNext={handleNext}
+          onPrev={handlePrev}
+        />
+      )}
 
       <BottomNav />
     </div>
