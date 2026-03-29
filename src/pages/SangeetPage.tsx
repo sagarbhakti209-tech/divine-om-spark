@@ -1,47 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Heart, MoreVertical } from "lucide-react";
+import { Play, Pause, Heart, MoreVertical, Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import NowPlayingBar from "@/components/NowPlayingBar";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
-
-import hanuman from "@/assets/hanuman.jpg";
-import shiva from "@/assets/shiva.jpg";
-import krishna from "@/assets/krishna.jpg";
-import ram from "@/assets/ram.jpg";
-import lakshmi from "@/assets/lakshmi.jpg";
-import ganesha from "@/assets/ganesha.jpg";
-import durga from "@/assets/durga.jpg";
-import vishnu from "@/assets/vishnu.jpg";
-
-const deityCategories = [
-  { name: "पसंदीदा", img: "❤️", isEmoji: true },
-  { name: "हनुमान जी", img: hanuman },
-  { name: "शिव जी", img: shiva },
-  { name: "कृष्ण जी", img: krishna },
-  { name: "राम जी", img: ram },
-  { name: "माँ लक्ष्मी", img: lakshmi },
-  { name: "गणेश जी", img: ganesha },
-  { name: "माँ दुर्गा", img: durga },
-  { name: "विष्णु जी", img: vishnu },
-];
-
-const filters = ["सभी", "आरती", "चालीसा", "भजन", "मंत्र", "स्तोत्र"];
-
-const songs = [
-  { title: "हनुमान चालीसा", artist: "पंकज उधास", deity: "हनुमान जी", img: hanuman, duration: "12:45", category: "चालीसा" },
-  { title: "आरती कीजै हनुमान लला की", artist: "सुरेश वाडकर", deity: "हनुमान जी", img: hanuman, duration: "5:30", category: "आरती" },
-  { title: "ॐ गं गणपतये नमः - 108 बार", artist: "शंकर महादेवन", deity: "गणेश जी", img: ganesha, duration: "18:20", category: "मंत्र" },
-  { title: "महामृत्युंजय मंत्र", artist: "अनुराधा पौडवाल", deity: "शिव जी", img: shiva, duration: "11:15", category: "मंत्र" },
-  { title: "विष्णु जी की आरती", artist: "मिताली सिंह", deity: "विष्णु जी", img: vishnu, duration: "6:45", category: "आरती" },
-  { title: "शिव गायत्री मंत्र", artist: "महालक्ष्मी अय्यर", deity: "शिव जी", img: shiva, duration: "8:30", category: "मंत्र" },
-  { title: "ॐ शनि देवाय नमः", artist: "संजय बग्गा", deity: "शिव जी", img: shiva, duration: "9:10", category: "मंत्र" },
-  { title: "गणेश जी की आरती", artist: "दिवकी पांडे", deity: "गणेश जी", img: ganesha, duration: "4:55", category: "आरती" },
-  { title: "दुनिया चले ना श्री राम के बिना", artist: "उपासना मेहता", deity: "राम जी", img: ram, duration: "7:20", category: "भजन" },
-  { title: "श्री लक्ष्मी स्तोत्र", artist: "कविता कृष्णमूर्ति", deity: "माँ लक्ष्मी", img: lakshmi, duration: "10:05", category: "स्तोत्र" },
-  { title: "दुर्गा चालीसा", artist: "अनुराधा पौडवाल", deity: "माँ दुर्गा", img: durga, duration: "14:30", category: "चालीसा" },
-  { title: "कृष्ण भजन मधुर संग्रह", artist: "जसवंत सिंह", deity: "कृष्ण जी", img: krishna, duration: "22:15", category: "भजन" },
-];
+import { songs, deityCategories, filters } from "@/data/songs";
 
 const SangeetPage = () => {
   const [activeCategory, setActiveCategory] = useState(0);
@@ -65,19 +28,19 @@ const SangeetPage = () => {
   };
 
   const handlePlaySong = (globalIndex: number) => {
-    player.togglePlayPause(globalIndex, songs[globalIndex].duration);
+    player.togglePlayPause(globalIndex, songs[globalIndex].audioUrl);
   };
 
   const handleNext = () => {
     if (player.currentSongIndex === null) return;
     const nextIdx = (player.currentSongIndex + 1) % songs.length;
-    player.playSong(nextIdx, songs[nextIdx].duration);
+    player.playSong(nextIdx, songs[nextIdx].audioUrl);
   };
 
   const handlePrev = () => {
     if (player.currentSongIndex === null) return;
     const prevIdx = (player.currentSongIndex - 1 + songs.length) % songs.length;
-    player.playSong(prevIdx, songs[prevIdx].duration);
+    player.playSong(prevIdx, songs[prevIdx].audioUrl);
   };
 
   const currentSong = player.currentSongIndex !== null ? songs[player.currentSongIndex] : null;
@@ -154,6 +117,7 @@ const SangeetPage = () => {
             const globalIndex = songs.indexOf(song);
             const isPlaying = player.currentSongIndex === globalIndex && player.isPlaying;
             const isSelected = player.currentSongIndex === globalIndex;
+            const isLoadingThis = player.currentSongIndex === globalIndex && player.isLoading;
             return (
               <motion.div
                 key={`${song.title}-${i}`}
@@ -169,7 +133,9 @@ const SangeetPage = () => {
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                   <img src={song.img} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-background/40 flex items-center justify-center">
-                    {isPlaying ? (
+                    {isLoadingThis ? (
+                      <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    ) : isPlaying ? (
                       <div className="flex items-end gap-[2px] h-3">
                         {[0, 1, 2].map(b => (
                           <motion.div
@@ -229,6 +195,7 @@ const SangeetPage = () => {
           artist={currentSong.artist}
           img={currentSong.img}
           isPlaying={player.isPlaying}
+          isLoading={player.isLoading}
           progress={player.progress}
           onToggle={() => handlePlaySong(player.currentSongIndex!)}
           onClose={() => player.pause()}
