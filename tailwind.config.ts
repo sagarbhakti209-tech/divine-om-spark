@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
-        devanagari: ["Noto Sans Devanagari", "Poppins", "sans-serif"],
+        sans: ["Outfit", "sans-serif"],
+        devanagari: ["Noto Sans Devanagari", "Outfit", "sans-serif"],
+        cinzel: ["Cinzel Decorative", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -54,11 +55,16 @@ export default {
         saffron: {
           DEFAULT: "hsl(var(--saffron))",
           light: "hsl(var(--saffron-light))",
+          deep: "hsl(var(--saffron-deep))",
         },
         gold: {
           DEFAULT: "hsl(var(--gold))",
           light: "hsl(var(--gold-light))",
+          deep: "hsl(var(--gold-deep))",
         },
+        crimson: "hsl(var(--crimson))",
+        lotus: "hsl(var(--lotus))",
+        emerald: "hsl(var(--emerald))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -96,6 +102,10 @@ export default {
           "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "1" },
         },
+        "slide-up": {
+          from: { transform: "translateY(100%)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -103,6 +113,7 @@ export default {
         "fade-in": "fade-in 0.6s ease-out forwards",
         "scale-in": "scale-in 0.4s ease-out forwards",
         "pulse-glow": "pulse-glow 2s infinite ease-in-out",
+        "slide-up": "slide-up 0.5s ease-out forwards",
       },
     },
   },
