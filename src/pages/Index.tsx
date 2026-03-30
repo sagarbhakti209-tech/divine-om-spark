@@ -51,7 +51,7 @@ const stagger = {
   container: { show: { transition: { staggerChildren: 0.06 } } },
   item: {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.6 } },
+    show: { opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1] as [number, number, number, number], duration: 0.6 } },
   },
 };
 
