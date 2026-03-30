@@ -14,7 +14,6 @@ const SangeetPage = () => {
   const player = useAudioPlayer();
   const backgroundAudio = useAudio();
 
-  // Stop background Om/Gayatri drone when on Sangeet page to avoid distortion
   useEffect(() => {
     if (backgroundAudio.isPlaying) {
       backgroundAudio.switchTrack("silent");
@@ -56,20 +55,22 @@ const SangeetPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden pb-24">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--gold)/0.08)_0%,transparent_50%)]" />
+      <div className="absolute inset-0 bg-mesh-gradient" />
 
       <div className="relative z-10 px-4 pt-6 max-w-lg mx-auto">
         {/* Header */}
         <motion.div
-          className="flex items-center justify-between mb-4"
+          className="flex items-center justify-between mb-5"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="w-9 h-9 rounded-full glass-card flex items-center justify-center">
+          <motion.div className="w-10 h-10 rounded-2xl glass-card-elevated flex items-center justify-center" whileTap={{ scale: 0.9 }}>
             <span className="text-lg">🕉️</span>
-          </div>
-          <h1 className="text-lg font-bold text-primary font-devanagari">संगीत संग्रह</h1>
-          <div className="w-9 h-9 rounded-full glass-card flex items-center justify-center text-muted-foreground">
+          </motion.div>
+          <h1 className="text-lg font-bold text-foreground font-devanagari">
+            <span className="text-primary">संगीत</span> संग्रह
+          </h1>
+          <div className="w-10 h-10 rounded-2xl glass-card flex items-center justify-center text-muted-foreground">
             🎵
           </div>
         </motion.div>
@@ -77,16 +78,17 @@ const SangeetPage = () => {
         {/* Deity Categories */}
         <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide mb-2">
           {deityCategories.map((cat, i) => (
-            <button
+            <motion.button
               key={cat.name}
               onClick={() => setActiveCategory(i)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1 transition-all ${
-                activeCategory === i ? "scale-105" : "opacity-60"
+              className={`flex-shrink-0 flex flex-col items-center gap-1.5 transition-all ${
+                activeCategory === i ? "scale-105" : "opacity-50"
               }`}
+              whileTap={{ scale: 0.9 }}
             >
               <div
-                className={`w-12 h-12 rounded-full overflow-hidden border-2 flex items-center justify-center transition-all ${
-                  activeCategory === i ? "border-primary glow-saffron" : "border-border"
+                className={`w-12 h-12 rounded-2xl overflow-hidden border-2 flex items-center justify-center transition-all ${
+                  activeCategory === i ? "border-primary glow-saffron" : "border-border/30"
                 }`}
               >
                 {cat.isEmoji ? (
@@ -95,8 +97,8 @@ const SangeetPage = () => {
                   <img src={cat.img as string} alt={cat.name} className="w-full h-full object-cover" />
                 )}
               </div>
-              <span className="text-[9px] font-devanagari text-foreground whitespace-nowrap">{cat.name}</span>
-            </button>
+              <span className="text-[9px] font-devanagari text-foreground whitespace-nowrap font-medium">{cat.name}</span>
+            </motion.button>
           ))}
         </div>
 
@@ -106,9 +108,9 @@ const SangeetPage = () => {
             <button
               key={filter}
               onClick={() => setActiveFilter(i)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-devanagari transition-all ${
+              className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-devanagari font-medium transition-all ${
                 activeFilter === i
-                  ? "bg-primary text-primary-foreground"
+                  ? "gradient-saffron text-primary-foreground"
                   : "glass-card text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -118,7 +120,7 @@ const SangeetPage = () => {
         </div>
 
         {/* Song List */}
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <p className="text-xs text-muted-foreground mb-2 font-devanagari">
             {activeCategory === 0 ? "गाने चलाने के लिए टैप करें 🎶" : `${deityCategories[activeCategory].name} के भजन`}
           </p>
@@ -130,18 +132,19 @@ const SangeetPage = () => {
             return (
               <motion.div
                 key={`${song.title}-${i}`}
-                className={`glass-card flex items-center gap-3 p-3 transition-colors cursor-pointer ${
-                  isSelected ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/30"
+                className={`glass-card flex items-center gap-3 p-3 transition-all cursor-pointer ${
+                  isSelected ? "glow-saffron border-primary/30" : "hover:bg-muted/20"
                 }`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => handlePlaySong(globalIndex)}
+                whileTap={{ scale: 0.98 }}
               >
                 {/* Thumbnail */}
-                <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0">
                   <img src={song.img} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-background/40 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-background/30 flex items-center justify-center">
                     {isLoadingThis ? (
                       <Loader2 className="w-4 h-4 text-primary animate-spin" />
                     ) : isPlaying ? (
@@ -163,23 +166,21 @@ const SangeetPage = () => {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-devanagari truncate ${isPlaying ? "text-primary" : "text-foreground"}`}>
+                  <p className={`text-sm font-devanagari truncate font-medium ${isPlaying ? "text-primary" : "text-foreground"}`}>
                     {song.title}
                   </p>
                   <p className="text-[11px] text-muted-foreground font-devanagari truncate">{song.artist}</p>
                 </div>
 
-                {/* Duration */}
-                <span className="text-[10px] text-muted-foreground mr-1">{song.duration}</span>
+                <span className="text-[10px] text-muted-foreground mr-1 font-mono">{song.duration}</span>
 
-                {/* Actions */}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleLike(globalIndex); }}
                   className="p-1"
                 >
                   <Heart
-                    className={`w-4 h-4 transition-colors ${
-                      likedSongs.has(globalIndex) ? "text-primary fill-primary" : "text-muted-foreground"
+                    className={`w-4 h-4 transition-all ${
+                      likedSongs.has(globalIndex) ? "text-primary fill-primary scale-110" : "text-muted-foreground"
                     }`}
                   />
                 </button>
@@ -197,7 +198,6 @@ const SangeetPage = () => {
         </div>
       </div>
 
-      {/* Now Playing Bar */}
       {currentSong && (
         <NowPlayingBar
           songTitle={currentSong.title}
