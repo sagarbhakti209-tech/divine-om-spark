@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Heart, MoreVertical, Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import NowPlayingBar from "@/components/NowPlayingBar";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { useAudio } from "@/contexts/AudioContext";
 import { songs, deityCategories, filters } from "@/data/songs";
 
 const SangeetPage = () => {
@@ -11,6 +12,14 @@ const SangeetPage = () => {
   const [activeFilter, setActiveFilter] = useState(0);
   const [likedSongs, setLikedSongs] = useState<Set<number>>(new Set());
   const player = useAudioPlayer();
+  const backgroundAudio = useAudio();
+
+  // Stop background Om/Gayatri drone when on Sangeet page to avoid distortion
+  useEffect(() => {
+    if (backgroundAudio.isPlaying) {
+      backgroundAudio.switchTrack("silent");
+    }
+  }, []);
 
   const filteredSongs = songs.filter((song) => {
     if (activeFilter > 0 && song.category !== filters[activeFilter]) return false;
